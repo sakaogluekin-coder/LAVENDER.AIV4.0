@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LAVENDER AI v2.0</title>
+  
+  <meta name="theme-color" content="#030712">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: #030712;
+      color: #38bdf8;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-top: 6px;
+      width: 100%;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 5px;
+      color: #a855f7;
+      text-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+    }
+
+    .subtitle {
+      font-size: 0.65rem;
+      color: #38bdf8;
+      letter-spacing: 2px;
+      margin-top: 2px;
+    }
+
+    .api-container {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .api-input {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #e9d5ff;
+      font-size: 0.75rem;
+      outline: none;
+    }
+
+    .api-btn {
+      background: #9333ea;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .core-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 15px 0;
+      cursor: pointer;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid transparent;
+    }
+
+    .ring-outer {
+      width: 180px;
+      height: 180px;
+      border-top-color: #a855f7;
+      border-bottom-color: #38bdf8;
+      animation: spin 3s linear infinite;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+    }
+
+    .ring-inner {
+      width: 130px;
+      height: 130px;
+      border-left-color: #a855f7;
+      border-right-color: #38bdf8;
+      animation: spin-reverse 2s linear infinite;
+    }
+
+    .core-center {
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, #a855f7 0%, #030712 70%);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 0 30px #a855f7;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .core-container.listening .ring-outer {
+      border-top-color: #ef4444;
+      border-bottom-color: #ef4444;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+    }
+
+    .core-container.listening .core-center {
+      background: radial-gradient(circle, #ef4444 0%, #030712 70%);
+      box-shadow: 0 0 35px #ef4444;
+    }
+
+    .core-container.thinking .ring-outer {
+      border-top-color: #eab308;
+      border-bottom-color: #eab308;
+      animation-duration: 1s;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes spin-reverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .chat-box {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .msg-label {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      letter-spacing: 1px;
+    }
+
+    .user-msg {
+      font-size: 0.9rem;
+      color: #f8fafc;
+      min-height: 20px;
+    }
+
+    .jarvis-msg {
+      font-size: 0.9rem;
+      color: #c084fc;
+      font-weight: 600;
+      min-height: 24px;
+      line-height: 1.3;
+    }
+
+    .status-bar {
+      font-size: 0.75rem;
+      color: #e9d5ff;
+      text-align: center;
+      margin-bottom: 5px;
+      padding: 6px 10px;
+      background: rgba(147, 51, 234, 0.2);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title">LAVENDER</div>
+    <div class="subtitle">AI NEURAL NETWORK v2.0</div>
+  </header>
+
+  <div class="api-container">
+    <input type="password" id="api-key" class="api-input" placeholder="Groq API Key Yapıştırın" />
+    <button class="api-btn" onclick="saveApiKey()">Kaydet</button>
+  </div>
+
+  <div class="core-container" id="core-btn" onclick="startListening()">
+    <div class="ring ring-outer"></div>
+    <div class="ring ring-inner"></div>
+    <div class="core-center" id="core-text">DOKUN<br>KONUŞ</div>
+  </div>
+
+  <div class="chat-box">
+    <div>
+      <div class="msg-label">SEN:</div>
+      <div class="user-msg" id="user-speech">Konuşmak için çekirdeğe dokunun...</div>
+    </div>
+    <hr style="border: 0; border-top: 1px solid rgba(168, 85, 247, 0.2);">
+    <div>
+      <div class="msg-label">LAVENDER:</div>
+      <div class="jarvis-msg" id="jarvis-reply">Sistemler aktif, sizi dinliyorum Efendim.</div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="status-text">
+    ⚡ Sistem Hazır!
+  </div>
+
+  <script>
+    const userSpeechEl = document.getElementById("user-speech");
+    const jarvisReplyEl = document.getElementById("jarvis-reply");
+    const coreBtn = document.getElementById("core-btn");
+    const coreText = document.getElementById("core-text");
+    const apiKeyInput = document.getElementById("api-key");
+    const statusText = document.getElementById("status-text");
+
+    let apiKey = localStorage.getItem("jarvis_groq_key") || "";
+    if (apiKey) {
+      apiKeyInput.value = apiKey;
+      statusText.innerText = "⚡ API Key Yüklü! Konuşabilirsiniz.";
+    }
+
+    function saveApiKey() {
+      const key = apiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem("jarvis_groq_key", key);
+        apiKey = key;
+        statusText.innerText = "⚡ Yeni API Key Kaydedildi!";
+        alert("API Key cihazınıza güvenle kaydedildi!");
+      } else {
+        alert("Lütfen geçerli bir anahtar girin.");
+      }
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'tr-TR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        coreBtn.className = "core-container listening";
+        coreText.innerHTML = "DİNLİYOR...";
+        userSpeechEl.innerText = "Sizi dinliyorum Efendim...";
+      };
+
+      recognition.onend = () => {
+        if (!coreBtn.classList.contains("thinking")) {
+          coreBtn.className = "core-container";
+          coreText.innerHTML = "DOKUN<br>KONUŞ";
+        }
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userSpeechEl.innerText = `"${transcript}"`;
+        askLavenderAI(transcript);
+      };
+
+      recognition.onerror = () => {
+        speak("Sizi tam anlayamadım Efendim.");
+        coreBtn.className = "core-container";
+        coreText.innerHTML = "DOKUN<br>KONUŞ";
+      };
+    }
+
+    function speak(text) {
+      jarvisReplyEl.innerText = text;
+      
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'tr-TR';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    async function callGroqAPI(modelName, query, key) {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + key,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [
+            {
+              role: "system",
+              content: "Sen Lavender adında havalı, zeki ve sadık bir yapay zeka asistanısın. Kullanıcıya her zaman 'Efendim' diye hitap et. Yanıtların akıcı, net ve 1-2 cümle olsun."
+            },
+            {
+              role: "user",
+              content: query
+            }
+          ],
+          max_tokens: 300,
+          temperature: 0.7
+        })
+      });
+      return response;
+    }
+
+    async function askLavenderAI(userQuery) {
+      const currentKey = localStorage.getItem("jarvis_groq_key");
+
+      if (!currentKey) {
+        speak("Efendim, lütfen önce yukarıdaki kutuya Groq API Key yapıştırıp Kaydet butonuna basın.");
+        return;
+      }
+
+      coreBtn.className = "core-container thinking";
+      coreText.innerHTML = "DÜŞÜNÜYOR...";
+      jarvisReplyEl.innerText = "İşleniyor...";
+      statusText.innerText = "⏳ Lavender yanıt oluşturuyor...";
+
+      const modelsToTry = [
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3.8-27b"
+      ];
+
+      let success = false;
+      let lastErrorMessage = "";
+
+      for (const model of modelsToTry) {
+        try {
+          const res = await callGroqAPI(model, userQuery, currentKey);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.choices && data.choices[0] && data.choices[0].message) {
+              const aiReply = data.choices[0].message.content;
+              if (aiReply && aiReply.trim() !== "") {
+                statusText.innerText = "✅ Yanıt Alındı (" + model + ")";
+                speak(aiReply.trim());
+                success = true;
+                break;
+              }
+            }
+          } else {
+            const errData = await res.json();
+            lastErrorMessage = errData.error ? errData.error.message : "API Hatası";
+          }
+        } catch (e) {
+          lastErrorMessage = e.message;
+        }
+      }
+
+      if (!success) {
+        statusText.innerText = "❌ Hata: " + lastErrorMessage;
+        speak("Üzgünüm Efendim, yanıt alınamadı.");
+      }
+
+      coreBtn.className = "core-container";
+      coreText.innerHTML = "DOKUN<br>KONUŞ";
+    }
+
+    function startListening() {
+      if (recognition) {
+        try {
+          recognition.start();
+        } catch (e) {
+          recognition.stop();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
